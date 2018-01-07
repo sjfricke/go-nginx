@@ -1,22 +1,25 @@
 package main
 
 import (
-	// "io/ioutil"
+	// "bytes"
 	"flag"
 	"fmt"
-	// "os"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 var (
 	path     = flag.String("path", "/var/www", "path to where to save directory")
 	domain   = flag.String("domain", "", "domain of site")
-	suffix   = flag.String("suffix", "html", "folder to append inside your directory for files")
+	suffix   = flag.String("suffix", "", "folder to append inside your directory for files")
 	input    = flag.String("input", "", "input files with line-by-line list of flags for batch run")
-	cDefault = flag.Bool("default", "false", "creates a default file instead")
+	cDefault = flag.Bool("default", false, "creates a default file instead")
 
 	available string = "/etc/nginx/sites-available"
 	enabled   string = "/etc/nginx/sites-enabled"
 	fullPath  string
+	args      [][]string
 )
 
 func checkErr(err error) {
@@ -86,15 +89,37 @@ func main() {
 
 	flag.Parse()
 
-	if *domain == "" || *path == "" {
-		panic("Domain or path is nil")
-	}
-
-	fullPath = fmt.Sprintf("%s/%s/%s", *path, *domain, *suffix)
-
-	if *cDefault {
-		fmt.Println(Default())
+	// check input to genearte args list
+	if *input != "" {
+		data, err := ioutil.ReadFile(*input)
+		checkErr(err)
+		lines := strings.Split(string(data), "\n")
+		for _, l := range lines {
+			args = append(args, strings.Split(l, " "))
+		}
 	} else {
-		fmt.Println(Config())
+		args = append(args, os.Args[0:1])
 	}
+
+	// main loop
+	for _, arg := range args {
+		os.Args = os.Args[0:1] // clears
+		os.Args = append(os.Args, arg...)
+		flag.Parse()
+
+		// Execute each
+
+		if *domain == "" || *path == "" {
+			panic("Domain or path is nil")
+		}
+
+		fullPath = fmt.Sprintf("%s/%s/%s", *path, *domain, *suffix)
+
+		fmt.Println(fullPath)
+	}
+	// 	if *cDefault {
+	// 		fmt.Println(Default())
+	// 	} else {
+	// 		fmt.Println(Config())
+	// 	}
 }

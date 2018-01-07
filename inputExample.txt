@@ -1,0 +1,3 @@
+-path /var/www -domain example.com -suffix html -default true	
+-path /var/www -domain mysite.com -suffix html
+-path /root -domain iamroot.org -suffix html
