@@ -8,7 +8,7 @@ Personal script to setup nginx for a new domain. It goes and create the folder t
 
 ## Usage
 
-- **NEED TO RUN AS ROOT** - `sudo go-nginx <args>`
+- **NEED TO RUN AS ROOT**
 - **NEED TO RESTART NGINX YOURSELF** - `sudo service nginx restart`
 	- Can check if configurations all worked with `sudo nginx -t`
 

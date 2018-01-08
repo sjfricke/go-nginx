@@ -120,7 +120,7 @@ func main() {
 		fullPath = fmt.Sprintf("%s/%s/%s", *path, *domain, *suffix)
 
 		if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-			os.Mkdir(fullPath, 0755)
+			os.MkdirAll(fullPath, 0755)
 		}
 
 		if *cDefault {
