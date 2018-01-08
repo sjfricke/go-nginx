@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -19,6 +20,9 @@ var (
 	available string = "/etc/nginx/sites-available"
 	enabled   string = "/etc/nginx/sites-enabled"
 	fullPath  string
+	aFile     string
+	eFile     string
+	output    string
 	args      [][]string
 )
 
@@ -115,11 +119,35 @@ func main() {
 
 		fullPath = fmt.Sprintf("%s/%s/%s", *path, *domain, *suffix)
 
-		fmt.Println(fullPath)
+		if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+			os.Mkdir(fullPath, 0755)
+		}
+
+		if *cDefault {
+			aFile = fmt.Sprintf("%s/%s", available, "default")
+			eFile = fmt.Sprintf("%s/%s", enabled, "default")
+			output = Default()
+		} else {
+			aFile = fmt.Sprintf("%s/%s", available, *domain)
+			eFile = fmt.Sprintf("%s/%s", enabled, *domain)
+			output = Config()
+		}
+
+		f, err := os.Create(aFile)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		if _, err = f.WriteString(output); err != nil {
+			panic(err)
+		}
+
+		// don't forget to link up
+		cmd := exec.Command("ln", "-s", aFile, eFile)
+		err = cmd.Run()
+		checkErr(err)
+
+		fmt.Println(fullPath, "finished")
 	}
-	// 	if *cDefault {
-	// 		fmt.Println(Default())
-	// 	} else {
-	// 		fmt.Println(Config())
-	// 	}
 }
