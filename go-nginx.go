@@ -146,7 +146,9 @@ func main() {
 		// don't forget to link up
 		cmd := exec.Command("ln", "-s", aFile, eFile)
 		err = cmd.Run()
-		checkErr(err)
+		if err != nil {
+			fmt.Println(err) // probably already linked
+		}
 
 		fmt.Println(fullPath, "finished")
 	}
